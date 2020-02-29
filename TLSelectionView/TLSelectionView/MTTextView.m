@@ -22,18 +22,23 @@
 
 - (instancetype) initWithFrame:(CGRect)frame {
     if (self == [super initWithFrame:frame]) {
-        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
-        [paragraphStyle setLineSpacing:3];
-        NSDictionary *attributes = @{
-            NSFontAttributeName:[UIFont systemFontOfSize:15],
-            NSParagraphStyleAttributeName:paragraphStyle
-        };
-        self.typingAttributes = attributes;
+//        NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+//        [paragraphStyle setLineSpacing:3];
+//        NSDictionary *attributes = @{
+//            NSFontAttributeName:[UIFont systemFontOfSize:15],
+//            NSParagraphStyleAttributeName:paragraphStyle
+//        };
+//        self.typingAttributes = attributes;
         
         _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGestureDidFire:)];
         [self addGestureRecognizer:_longPressGestureRecognizer];
         
-        
+        // 不移除会触发touchesCancelled方法，导致滑动不顺滑
+        for (UIView *view in self.subviews) {
+            if (![view isKindOfClass:[TLSelectRangManager class]]) {
+                [view removeFromSuperview];
+            }
+        }
     }
     return self;
 }
@@ -50,7 +55,7 @@
     
     
     
-    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText size:self.contentSize view:self];
+    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText size:self.frame.size view:self];
     TLRunItem *currentItem = [TLSelectRangManager currentItem:point allRunItemArray:allItems inset:0.5];
     
     

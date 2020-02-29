@@ -55,6 +55,13 @@ NS_ASSUME_NONNULL_BEGIN
 // 根据point获取当前的currentRunItem
 + (TLRunItem *)currentItem:(CGPoint)point allRunItemArray:(NSArray <TLRunItem *>*)allRunItemArray inset:(CGFloat)inset;
 
+
+/// 获取选中的文字 富文本
+- (NSAttributedString *)selectArrtibutedString;
+
+/// 获取选中的文字 
+- (NSString *)selectStringWithIsCopy:(BOOL)isCopyToPasteboard;
+
 @end
 
 NS_ASSUME_NONNULL_END

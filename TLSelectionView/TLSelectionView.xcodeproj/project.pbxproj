@@ -158,13 +158,13 @@
 		60ED356824091147005CFB14 /* TLSelectionView */ = {
 			isa = PBXGroup;
 			children = (
-				60ED356924091147005CFB14 /* TLSelectRangManager.h */,
-				60ED356A24091147005CFB14 /* TLCTLineLayoutModel.m */,
-				60ED356B24091147005CFB14 /* TLRunItem.m */,
-				60ED356C24091147005CFB14 /* TLSelectTextRangeView.h */,
-				60ED356D24091147005CFB14 /* TLCTLineLayoutModel.h */,
-				60ED356E24091147005CFB14 /* TLSelectRangManager.m */,
 				60ED356F24091147005CFB14 /* TLRunItem.h */,
+				60ED356B24091147005CFB14 /* TLRunItem.m */,
+				60ED356D24091147005CFB14 /* TLCTLineLayoutModel.h */,
+				60ED356A24091147005CFB14 /* TLCTLineLayoutModel.m */,
+				60ED356924091147005CFB14 /* TLSelectRangManager.h */,
+				60ED356E24091147005CFB14 /* TLSelectRangManager.m */,
+				60ED356C24091147005CFB14 /* TLSelectTextRangeView.h */,
 				60ED357024091147005CFB14 /* TLSelectTextRangeView.m */,
 			);
 			path = TLSelectionView;

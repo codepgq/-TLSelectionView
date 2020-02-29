@@ -7,7 +7,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface MTTextView : UITextView
+@interface MTTextView : UILabel
 
 @property (nonatomic,assign) BOOL isCloseCopy;
 

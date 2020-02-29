@@ -50,31 +50,25 @@
 //    ttView.attributedText = attString;
 //    [self.view addSubview:ttView];
 //
-    tView.contentInset = UIEdgeInsetsZero;
+//    tView.contentInset = UIEdgeInsetsZero;
     tView.backgroundColor = [UIColor greenColor];
     tView.attributedText = attString;
-    tView.scrollEnabled = false;
+//    tView.scrollEnabled = false;
+    
+    tView.numberOfLines = 0;
+    tView.userInteractionEnabled = true;
+    
+    
 }
 
-//
-//- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-//    [[TLSelectRangManager instance] hideSelectTextRangeView];
-//
-//    CGPoint point = CGPointZero;
-//    // 计算每个ctrunref的信息
-//
-//    NSArray *allItems = [TLRunItem getItemsWith:tView.attributedText size:tView.contentSize view:tView];
-//    TLRunItem *currentItem = [TLSelectRangManager currentItem:point allRunItemArray:allItems inset:0.5];
-//
-//    [[TLSelectRangManager instance] showSelectViewInCJLabel:tView
-//                                                    atPoint:point
-//                                                    runItem:currentItem
-//                                               maxLineWidth:tView.frame.size.width
-//                                            allRunItemArray:allItems
-//                                              hideViewBlock:^() {
-//    }];
-//
-//}
+
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    NSAttributedString *attStr = [[TLSelectRangManager instance] selectArrtibutedString];
+    NSString *str = [[TLSelectRangManager instance] selectStringWithIsCopy:true];
+    
+    NSLog(@"att %@  \nstr %@", attStr, str);
+
+}
 
 
 - (NSString  *)content1 {

@@ -91,7 +91,7 @@ typedef void(^TLSelectRangManagerBlock)(void);
         manager.backWindView = [[TLWindowView alloc]initWithFrame:CGRectMake(0, 0, 1, 1)];
         __weak typeof(manager)wManager = manager;
         manager.backWindView.hitTestBlock = ^(BOOL hide) {
-            [wManager hideSelectTextRangeView];
+//            [wManager hideSelectTextRangeView];
         };        /*
          *选择复制填充背景色视图
          */
@@ -273,6 +273,33 @@ typedef void(^TLSelectRangManagerBlock)(void);
 
 - (BOOL)isShow {
     return !self.textRangeView.isHidden;
+}
+
+/// 获取选中的文字
+- (NSAttributedString *)selectArrtibutedString {
+    // 获取选取范围
+    NSRange rangeCopy = [self selectRange];
+    
+    if (rangeCopy.length == -1) {
+        return nil;
+    }
+    return [self.attributedText attributedSubstringFromRange:rangeCopy];
+}
+
+/// 获取选中的文字
+- (NSString *)selectStringWithIsCopy:(BOOL)isCopyToPasteboard {
+    // 获取选取范围
+    NSRange rangeCopy = [self selectRange];
+    
+    if (rangeCopy.length == -1) {
+        return nil;
+    }
+    NSString *str = [self.attributedText.string substringWithRange:rangeCopy];
+    if (isCopyToPasteboard) {
+        UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+        pasteboard.string = str;
+    }
+    return str;
 }
 
 #pragma mark - UILongPressGestureRecognizer
@@ -519,6 +546,27 @@ typedef void(^TLSelectRangManagerBlock)(void);
     }
 }
 
+/// 选中区域
+- (NSRange)selectRange {
+    NSRange rangeCopy = NSMakeRange(0, -1);
+    if (_startCopyRunItem && _endCopyRunItem) {
+        
+        NSUInteger loc = _startCopyRunItem.characterRange.location;
+        loc = loc<=0?0:loc;
+        
+        NSUInteger length = _endCopyRunItem.characterRange.location+_endCopyRunItem.characterRange.length - loc;
+        
+        if (length >= self.attributedText.string.length-loc) {
+            length = self.attributedText.string.length-loc;
+        }
+        
+        @autoreleasepool {
+            rangeCopy = NSMakeRange(loc,length);
+        }
+    }
+    return  rangeCopy;
+}
+
 #pragma mark - UIResponder
 - (void)selectAll:(nullable id)sender {
     _startCopyRunItem = [_firstRunItem copy];
@@ -527,5 +575,7 @@ typedef void(^TLSelectRangManagerBlock)(void);
     
     [self showCJSelectViewWithPoint:point selectType:ShowAllSelectView item:nil startCopyRunItem:_startCopyRunItem endCopyRunItem:_endCopyRunItem  needShowMagnifyView:false];
 }
+
+
 
 @end
