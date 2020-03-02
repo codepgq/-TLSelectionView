@@ -14,6 +14,10 @@
  https://www.jianshu.com/p/b15455d7d30d CJLabel图文混排一 ——UILabel富文本显示以及任意字符的点击响应
  
  https://github.com/GIKICoder/GRichLabel 这个也是富文本框架，也是View，有类似微信的效果。已经封装好了 但是依赖其他库
+ 
+ 
+ 
+ 如果把MMTextView的继承改为UILabel，就没有这个问题
  */
 
 
@@ -55,8 +59,10 @@
     tView.attributedText = attString;
 //    tView.scrollEnabled = false;
     
-    tView.numberOfLines = 0;
+//    tView.numberOfLines = 0;
     tView.userInteractionEnabled = true;
+    
+    tView.multipleTouchEnabled = false;
     
     
 }

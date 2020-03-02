@@ -32,13 +32,17 @@
         
         _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGestureDidFire:)];
         [self addGestureRecognizer:_longPressGestureRecognizer];
-        
+//        
         // 不移除会触发touchesCancelled方法，导致滑动不顺滑
-        for (UIView *view in self.subviews) {
-            if (![view isKindOfClass:[TLSelectRangManager class]]) {
-                [view removeFromSuperview];
-            }
+       
+        
+        for (UIView *v in self.subviews) {
+            v.userInteractionEnabled = false;
         }
+        self.showsVerticalScrollIndicator = false;
+        self.showsHorizontalScrollIndicator = false;
+        
+//        [self.subviews[1].subviews[1] removeFromSuperview];
     }
     return self;
 }
@@ -49,16 +53,14 @@
     
     if ([[TLSelectRangManager instance] isShow]) { return; }
     _isLongPress = true;
-    
+    [self.subviews[1].subviews[1] removeFromSuperview];
     CGPoint point = [sender locationInView:self];
-    // 计算每个ctrunref的信息
     
-    
-    
-    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText size:self.frame.size view:self];
+    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText size:self.contentSize view:self];
     TLRunItem *currentItem = [TLSelectRangManager currentItem:point allRunItemArray:allItems inset:0.5];
     
-    
+    self.canCancelContentTouches = false;
+    [sender removeTarget:self action:@selector(longPressGestureDidFire:)];
     UIViewController *topVC = [self topViewController];
     UINavigationController *navCtr = nil;
     BOOL popGestureEnable = NO;
@@ -74,10 +76,13 @@
                                             allRunItemArray:allItems
                                               hideViewBlock:^() {
         self->_isLongPress = false;
+        [self addGestureRecognizer:sender];
     }];
     
 }
-
+- (BOOL)touchesShouldCancelInContentView:(UIView *)view {
+    return false;
+}
 
 #pragma mark - 系统方法
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {

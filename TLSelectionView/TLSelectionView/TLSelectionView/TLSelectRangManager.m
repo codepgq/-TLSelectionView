@@ -302,6 +302,17 @@ typedef void(^TLSelectRangManagerBlock)(void);
     return str;
 }
 
++ (TLRunItem *)currentItem:(CGPoint)point allRunItemArray:(NSArray <TLRunItem *>*)allRunItemArray inset:(CGFloat)inset {
+    __block TLRunItem *currentItem = nil;
+    [allRunItemArray enumerateObjectsUsingBlock:^(TLRunItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (CGRectContainsPoint(CGRectInset(obj.withOutMergeBounds, -inset, -inset), point)) {
+            currentItem = [obj copy];
+            *stop = YES;
+        }
+    }];
+    return currentItem;
+}
+
 #pragma mark - UILongPressGestureRecognizer
 - (void)longPressGestureDidFire:(UILongPressGestureRecognizer *)sender {
     
@@ -429,17 +440,11 @@ typedef void(^TLSelectRangManagerBlock)(void);
     }
 }
 
-
-+ (TLRunItem *)currentItem:(CGPoint)point allRunItemArray:(NSArray <TLRunItem *>*)allRunItemArray inset:(CGFloat)inset {
-    __block TLRunItem *currentItem = nil;
-    [allRunItemArray enumerateObjectsUsingBlock:^(TLRunItem * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if (CGRectContainsPoint(CGRectInset(obj.withOutMergeBounds, -inset, -inset), point)) {
-            currentItem = [obj copy];
-            *stop = YES;
-        }
-    }];
-    return currentItem;
+- (BOOL)touchesShouldCancelInContentView:(UIView *)view {
+    return false;
 }
+
+
 
 #pragma mark - Private Method
 - (void)showCJSelectViewWithPoint:(CGPoint)point
