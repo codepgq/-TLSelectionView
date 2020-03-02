@@ -54,16 +54,12 @@
 //    ttView.attributedText = attString;
 //    [self.view addSubview:ttView];
 //
-//    tView.contentInset = UIEdgeInsetsZero;
+    tView.contentInset = UIEdgeInsetsZero;
     tView.backgroundColor = [UIColor greenColor];
     tView.attributedText = attString;
-//    tView.scrollEnabled = false;
+    tView.scrollEnabled = false;
     
-//    tView.numberOfLines = 0;
-    tView.userInteractionEnabled = true;
-    
-    tView.multipleTouchEnabled = false;
-    
+    tView.selectable = false;
     
 }
 
