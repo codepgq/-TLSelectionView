@@ -64,7 +64,11 @@ typedef struct TLCTLineVerticalLayout TLCTLineVerticalLayout;
 @property (nonatomic, assign) NSRange characterRange;
 
 
-+ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString size:(CGSize)size view:(UIView *)view;
+/// 根据富文本计算得出信息，用于绘制选择区域
+/// @param attributedString attributedString
+/// @param rect rect
+/// @param view view
++ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UIView *)view;
 @end
 
 NS_ASSUME_NONNULL_END

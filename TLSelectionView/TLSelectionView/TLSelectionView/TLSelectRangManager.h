@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface TLSelectRangManager : UIView
 @property (nonatomic, strong) TLSelectTextRangeView *textRangeView;//选中复制填充背景色的view
-@property (nonatomic, strong, nullable) NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray;
+@property (nonatomic, strong) NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray;
 /// 是否已经显示
 @property (nonatomic,assign) BOOL isShow;
 

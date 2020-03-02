@@ -36,7 +36,7 @@
      
         self.showsVerticalScrollIndicator = false;
         self.showsHorizontalScrollIndicator = false;
-        
+
     }
     return self;
 }
@@ -49,7 +49,9 @@
    
     CGPoint point = [sender locationInView:self];
     
-    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText size:self.contentSize view:self];
+    CGRect textRect = UIEdgeInsetsInsetRect(CGRectMake(0, 0, self.contentSize.width, self.contentSize.height), self.contentInset);
+    
+    NSArray *allItems = [TLRunItem getItemsWith:self.attributedText textRect:textRect view:self];
     TLRunItem *currentItem = [TLSelectRangManager currentItem:point allRunItemArray:allItems inset:0.5];
     
    

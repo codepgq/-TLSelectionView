@@ -47,7 +47,24 @@
     tView.backgroundColor = [UIColor redColor];
     [self.view addSubview:tView];
     
-    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:17])}];
+    NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+//    paragraphStyle.lineSpacing = 10;// 字体的行间距
+//    paragraphStyle.firstLineHeadIndent = 20.0f;//首行缩进
+//    paragraphStyle.alignment = NSTextAlignmentJustified;//（两端对齐的）文本对齐方式：（左，中，右，两端对齐，自然）
+//    paragraphStyle.lineBreakMode = NSLineBreakByClipping;//结尾部分的内容以……方式省略 ( "...wxyz" ,"abcd..." ,"ab...yz")
+//    paragraphStyle.headIndent = 20;//整体缩进(首行除外)
+//    paragraphStyle.tailIndent = 20;//
+//    paragraphStyle.minimumLineHeight = 10;//最低行高
+//    paragraphStyle.maximumLineHeight = 20;//最大行高
+//    paragraphStyle.paragraphSpacing = 15;//段与段之间的间距
+//    paragraphStyle.paragraphSpacingBefore = 22.0f;//段首行空白空间/* Distance between the bottom of the previous paragraph (or the end of its paragraphSpacing, if any) and the top of this paragraph. */
+//    paragraphStyle.baseWritingDirection = NSWritingDirectionLeftToRight;//从左到右的书写方向（一共➡️三种）
+//    paragraphStyle.lineHeightMultiple = 15;/* Natural line height is multiplied by this factor (if positive) before being constrained by minimum and maximum line height. */
+//    paragraphStyle.hyphenationFactor = 1;//连字属性 在iOS，唯一支持的值分别为0和1
+
+    
+    
+    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:17]), NSParagraphStyleAttributeName: paragraphStyle}];
 //
 //    ttView = [[UITextView alloc] initWithFrame:(CGRectMake(0, 300, 414, 200))];
 //    ttView.backgroundColor = UIColor.yellowColor;
@@ -61,29 +78,46 @@
     
     tView.selectable = false;
     
+    
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    
+    CGSize constraintSize = CGSizeMake(tView.frame.size.width, MAXFLOAT);
+
+    CGSize size = [tView sizeThatFits:constraintSize];
+//    CGSize size = tView.contentSize;
+    CGRect rect = tView.frame;
+    rect.size.width = size.width;
+    rect.size.height = size.height;
+    tView.frame = rect;
+
 }
 
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-    NSAttributedString *attStr = [[TLSelectRangManager instance] selectArrtibutedString];
-    NSString *str = [[TLSelectRangManager instance] selectStringWithIsCopy:true];
-    
-    NSLog(@"att %@  \nstr %@", attStr, str);
+//    NSAttributedString *attStr = [[TLSelectRangManager instance] selectArrtibutedString];
+//    NSString *str = [[TLSelectRangManager instance] selectStringWithIsCopy:true];
+//    
+//    NSLog(@"att %@  \nstr %@", attStr, str);
 
+    
+    
 }
 
 
 - (NSString  *)content1 {
 //    return @"也比不也比不也比不也比不也比不也比不也比不spancer 🏀👨‍👩‍👧‍👦👨‍👩‍👧‍👦@张三";
-    return @"示例三：选择复制\n\n支持复制，😆双击或者长按可唤起😁UIMenuController进行选择复制文本操作。\n设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
-    return @"⛹🏼‍♀️👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦 spancer✨”❤️[哭笑不得]🐶🏀不上陆[大便]@张三 ，也比不[大便]上陆@张三 @ @[呕吐]👻👑👑[哭笑不得]🐶不上陆@张三 @倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕# 春天在他的眼 [干杯]aa ";
+    return @"示例三：选择复制支持复制，😆双击或者长按可唤起😁UIMenuController进行选择复制文本操作。\n设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
+//    return @"⛹🏼‍♀️👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦 spancer✨”❤️[哭笑不得]🐶🏀不上陆[大便]@张三 ，也比不[大便]上陆@张三 @ @[呕吐]👻👑👑[哭笑不得]🐶不上陆@张三 @倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕# 春天在他的眼 [干杯]aa ";
 }
 
 - (void)getInfo {
     
-    NSMutableArray<TLRunItem *> *items = [TLRunItem getItemsWith:ttView.attributedText size:ttView.contentSize view:ttView];
-    
-    NSLog(@"%zd", items.count);
+//    NSMutableArray<TLRunItem *> *items = [TLRunItem getItemsWith:ttView.attributedText textRect:CGRectMake(0, 0, 0, 0) view:ttView];
+//
+//    NSLog(@"%zd", items.count);
 }
 
 

@@ -46,8 +46,13 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     return item;
 }
 
+#pragma mark - 公开方法
 
-+ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString size:(CGSize)size view:(UIView *)view {
+/// 根据富文本计算得出信息，用于绘制选择区域
+/// @param attributedString attributedString
+/// @param rect rect
+/// @param view view
++ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UIView *)view {
     
     // 保存item用的数组
     __block NSMutableArray *items = [NSMutableArray array];
@@ -73,31 +78,40 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     }];
     
     NSAttributedString *attributedM = matt;
+//    view.attributedText = matt;
     // 1、根据attstring 得到工厂类
     // 生成工厂类
     CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
     
     // 2、得到ctframe
-    CGRect rect = (CGRect){CGPointZero, size};
+//    CGRect rect = (CGRect){CGPointZero, size};
     CGMutablePathRef path = CGPathCreateMutable();
     CGPathAddRect(path, NULL, rect);
     
     CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedM));
     CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
 
+    // 3、得到lines
     NSArray *lines = (NSArray *)CTFrameGetLines(ctFrame);
-
+    
+    // 根据lines获取每一行的原点信息
     CGPoint origins[lines.count];//the origins of each line at the baseline
     CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), origins);
-
-    NSMutableArray <TLCTLineLayoutModel*>*verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
+    
+    // 新建一个数组，保存每一行的一些基本信息
+    NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
+    
+    // 行下标
     NSUInteger lineIndex = 0;
     TLCTLineVerticalLayout layout;
     for (id lineObj in lines) {
+        // 获取行
         CTLineRef line = (__bridge CTLineRef)lineObj;
-        
+        // 计算每一行的 ascent descent leading
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
         CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
+        
+        // 把上面的信息转化为model，记录起来
         layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
         layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height;
         TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
@@ -105,32 +119,41 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         model.lineVerticalLayout = layout;
         model.selectCopyBackY = layout.lineRect.origin.y;
         model.selectCopyBackHeight = layout.lineRect.size.height;
+        
+        // 保存line信息
         [verticalLayoutArray addObject:model];
+        
         NSLog(@"xxxxxx %@", NSStringFromCGRect(layout.lineRect));
         
+        // 得到每一行中的所有的CTRunRef对象，从而计算得到每个字符的位置大小
         NSArray *runs = ((NSArray *)CTLineGetGlyphRuns(line));
         for (int idx = 0; idx < runs.count; idx++) {
+            // 得到run
             CTRunRef run = (__bridge CTRunRef)(runs[idx]);
+            // 获取字符的range
             CFRange runRange = CTRunGetStringRange(run);
 
+            // 用来保存run的大小位置
             CGRect runBounds;
 
+            // 每个字符的ascent desecnt leading
             CGFloat ascent;//height above the baseline
             CGFloat descent;//height below the baseline
             CGFloat leading;
             runBounds.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, &leading);
             runBounds.size.height = ascent + descent;
 
+            // 计算x的偏移量
             CGFloat xOffset = CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL);
+            
+            // 计算y坐标
             runBounds.origin.x = origins[lineIndex].x + rect.origin.x + xOffset;
             runBounds.origin.y = origins[lineIndex].y + rect.origin.y;
             runBounds.origin.y -= descent;
-
-            //do something with runBounds
             
             NSLog(@"每一个runitem的信息 %@", NSStringFromCGRect(runBounds));
             
-            
+            // 把CTRunRef转化为model保存起来
             TLRunItem *item = [[TLRunItem alloc] init];
             item.lineVerticalLayout = layout;
             item.selectCopyBackY = item.lineVerticalLayout.lineRect.origin.y;
@@ -160,19 +183,24 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
             item.characterIndex = characterIndex;
             item.characterRange = substringRange;
             
-            
+            // 保存模型
             [items addObject:item];
         };
         lineIndex++;
     }
     
-    
+    // 释放资源
     CGPathRelease(path);
     CFRelease(framesetter);
+    
+    // 存储到单例中
     [TLSelectRangManager instance].verticalLayoutArray = verticalLayoutArray.mutableCopy;
+    
+    // 返回已经计算完的模型数组
     return items;
 }
 
+#pragma mark - 私有方法
 
 /// 生成每一行的必要参数保存
 + (TLCTLineVerticalLayout)CJCTLineVerticalLayoutFromLine:(CTLineRef)line
