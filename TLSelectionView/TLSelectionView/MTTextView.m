@@ -30,10 +30,12 @@
         };
         self.typingAttributes = attributes;
         
+        // 添加长按手势
         _longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(longPressGestureDidFire:)];
         [self addGestureRecognizer:_longPressGestureRecognizer];
 
      
+        // 隐藏水平/垂直进度条
         self.showsVerticalScrollIndicator = false;
         self.showsHorizontalScrollIndicator = false;
 
@@ -50,6 +52,8 @@
     CGPoint point = [sender locationInView:self];
     
     CGRect textRect = UIEdgeInsetsInsetRect(CGRectMake(0, 0, self.contentSize.width, self.contentSize.height), self.contentInset);
+    textRect = CGRectStandardize(textRect);
+    
     
     NSArray *allItems = [TLRunItem getItemsWith:self.attributedText textRect:textRect view:self];
     TLRunItem *currentItem = [TLSelectRangManager currentItem:point allRunItemArray:allItems inset:0.5];
@@ -82,10 +86,12 @@
     return NO;
 }
 
+/// 不允许成为第一响应者
 - (BOOL)canBecomeFirstResponder {
     return false;
 }
 
+#pragma mark - 私有方法
 - (UIViewController *)topViewController {
     UIViewController *resultVC = nil;
     resultVC = [self _topViewController:[TLkeyWindow() rootViewController]];
