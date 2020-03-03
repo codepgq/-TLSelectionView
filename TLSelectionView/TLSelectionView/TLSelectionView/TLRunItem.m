@@ -111,19 +111,24 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         CTLineRef line = (__bridge CTLineRef)lineObj;
         // 计算每一行的 ascent descent leading
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
+        CGRect AlineRect = CGRectZero;
+        
+        // 把上面的信息转化为model，记录起来
+        layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
+#if true // 之前的行高算法
+        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height - lineLeading - 2;
+#else
         CGFloat AlineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
         maxDescent = MAX(maxDescent, lineDescent);
         CGPoint AlineOrigin = origins[lineIndex];
         CGPoint AlinePoint;
-        AlinePoint.y = _pathRect.size.height - AlineOrigin.y - lineAscent + maxDescent + lineLeading*2 + 5;
+        AlinePoint.y = _pathRect.size.height - AlineOrigin.y - lineAscent + lineDescent + lineLeading*2 + 5;
         AlinePoint.x = _pathRect.origin.x + AlineOrigin.x;
-        CGRect AlineRect = CGRectMake(AlinePoint.x, AlinePoint.y, AlineWidth, CTLineGetBoundsWithOptions(line, 0).size.height + lineLeading);
-        
-        // 把上面的信息转化为model，记录起来
-        layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
-#if false // 之前的行高算法
-        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height;
-#else
+        AlineRect = CGRectMake(AlinePoint.x, AlinePoint.y, AlineWidth, CTLineGetBoundsWithOptions(line, 0).size.height + lineLeading);
+        NSLog(@"height: %.2f maxRunAscent %.2f maxRunHeight %.2f", AlineRect.size.height, layout.maxRunAscent, layout.maxRunHeight);
+        if (lineIndex == 5) {
+            NSLog(@"xxxxxxxx");
+        }
         layout.lineRect = AlineRect;
 #endif
         TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
