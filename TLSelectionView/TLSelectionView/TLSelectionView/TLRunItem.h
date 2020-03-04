@@ -68,7 +68,7 @@ typedef struct TLCTLineVerticalLayout TLCTLineVerticalLayout;
 /// @param attributedString attributedString
 /// @param rect rect
 /// @param view view
-+ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UIView *)view;
++ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UITextView *)view;
 @end
 
 NS_ASSUME_NONNULL_END

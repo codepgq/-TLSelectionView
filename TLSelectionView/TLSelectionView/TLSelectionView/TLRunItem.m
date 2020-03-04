@@ -52,7 +52,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
 /// @param attributedString attributedString
 /// @param rect rect
 /// @param view view
-+ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UIView *)view {
++ (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UITextView *)view {
     
     // 保存item用的数组
     __block NSMutableArray *items = [NSMutableArray array];
@@ -63,7 +63,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     __block int index = 0;
     [matt.string enumerateSubstringsInRange:NSMakeRange(0, [matt length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
      ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
-        
+//        NSLog(@"substring is %@", substring);
         TLTextTag *runUrl = nil;
         if (!runUrl) {
             NSString *urlStr = [NSString stringWithFormat:@"https://www.CJLabel%@",@(index)];
@@ -81,23 +81,50 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
 //    view.attributedText = matt;
     // 1、根据attstring 得到工厂类
     // 生成工厂类
-    CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
-    
-    // 2、得到ctframe
+//    CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
+//
+//    // 2、得到ctframe
     static CGRect _pathRect;
     _pathRect = rect;
-    rect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1, -1));
-    CGPathRef path = CGPathCreateWithRect(rect, NULL);
-    
-    CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedM));
-    CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
+////    rect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1, -1));
+//    CGPathRef path = CGPathCreateWithRect(rect, NULL);
+//
+//    CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedString));
+//    CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
 
     // 3、得到lines
-    NSArray *lines = (NSArray *)CTFrameGetLines(ctFrame);
+    
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0,0,rect.size.width,100000));
+    CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
+    NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
     
     // 根据lines获取每一行的原点信息
     CGPoint origins[lines.count];//the origins of each line at the baseline
-    CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), origins);
+    CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), origins);
+   
+    CGRect lineRects[lines.count];
+    for (int i = 0; i<lines.count; i++) {
+        CTLineRef lineRef = (__bridge CTLineRef )lines[i];
+        CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
+        CGFloat lineWidth = CTLineGetTypographicBounds(lineRef, &lineAscent, &lineDescent, &lineLeading);
+        lineRects[i] = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent + lineLeading, lineWidth, lineAscent + fabs(lineDescent) + lineLeading);
+        if (lineDescent < 0) {
+            NSLog(@"dddddddddd");
+        }
+        
+        if (lineAscent < 0) {
+            NSLog(@"fffffffffffff");
+        }
+        
+        if (lineLeading < 0) {
+            NSLog(@"llllllllllllllll");
+        }
+        NSLog(@"%.2f %.2f %.2f", lineAscent, lineDescent, lineLeading);
+        NSLog(@"lineRects %@ ", NSStringFromCGRect(lineRects[i]));
+    }
+    
     
     // 新建一个数组，保存每一行的一些基本信息
     NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
@@ -115,21 +142,25 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         
         // 把上面的信息转化为model，记录起来
         layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
-#if true // 之前的行高算法
-        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height - lineLeading - 2;
+#if false // 之前的行高算法
+        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height;
 #else
         CGFloat AlineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
         maxDescent = MAX(maxDescent, lineDescent);
         CGPoint AlineOrigin = origins[lineIndex];
         CGPoint AlinePoint;
-        AlinePoint.y = _pathRect.size.height - AlineOrigin.y - lineAscent + lineDescent + lineLeading*2 + 5;
-        AlinePoint.x = _pathRect.origin.x + AlineOrigin.x;
-        AlineRect = CGRectMake(AlinePoint.x, AlinePoint.y, AlineWidth, CTLineGetBoundsWithOptions(line, 0).size.height + lineLeading);
-        NSLog(@"height: %.2f maxRunAscent %.2f maxRunHeight %.2f", AlineRect.size.height, layout.maxRunAscent, layout.maxRunHeight);
-        if (lineIndex == 5) {
-            NSLog(@"xxxxxxxx");
+        AlinePoint.y = _pathRect.size.height - AlineOrigin.y - lineAscent + lineDescent;
+        if (lineIndex > 0) {
+            AlinePoint.y += lineLeading + view.contentInset.top + view.textContainerInset.top;
         }
-        layout.lineRect = AlineRect;
+        if (lineIndex == 0) {
+            AlinePoint.y = 0 + view.contentInset.top + view.textContainerInset.top;
+        }
+        AlinePoint.x = _pathRect.origin.x + AlineOrigin.x;
+        AlineRect = CGRectMake(AlinePoint.x, AlinePoint.y, AlineWidth, CTLineGetBoundsWithOptions(line, 0).size.height);
+        NSLog(@"height: %.2f maxRunAscent %.2f maxRunHeight %.2f", AlineRect.size.height, layout.maxRunAscent, layout.maxRunHeight);
+        AlineRect.size.height = layout.maxRunHeight;
+        layout.lineRect = lineRects[lineIndex];
 #endif
         TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
         model.lineIndex = lineIndex;
@@ -161,14 +192,23 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
             runBounds.size.height = ascent + descent;
 
             // 计算x的偏移量
-            CGFloat xOffset = CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL);
+            CGFloat xOffset = 0;
+            CFRange glyphRange = CTRunGetStringRange(run);
+            switch (CTRunGetStatus(run)) {
+                case kCTRunStatusRightToLeft:
+                    xOffset = CTLineGetOffsetForStringIndex(line, glyphRange.location + glyphRange.length, NULL);
+                    break;
+                default:
+                    xOffset = CTLineGetOffsetForStringIndex(line, glyphRange.location, NULL);
+                    break;
+            }
             
             // 计算y坐标
             runBounds.origin.x = origins[lineIndex].x + rect.origin.x + xOffset;
             runBounds.origin.y = origins[lineIndex].y + rect.origin.y;
             runBounds.origin.y -= descent;
             
-            NSLog(@"每一个runitem的信息 %@", NSStringFromCGRect(runBounds));
+//            NSLog(@"每一个runitem的信息 %@", NSStringFromCGRect(runBounds));
             
             // 把CTRunRef转化为model保存起来
             TLRunItem *item = [[TLRunItem alloc] init];
@@ -241,7 +281,6 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         CTRunRef run = CFArrayGetValueAtIndex(runs, j);
         CGFloat runAscent = 0.0f, runDescent = 0.0f, runLeading = 0.0f;
         CGFloat runWidth = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &runAscent, &runDescent, &runLeading);
-        NSLog(@"runWidth %0.2f", runWidth);
         NSDictionary *attDic = (__bridge NSDictionary *)CTRunGetAttributes(run);
         NSDictionary *imgInfoDic = attDic[kTLImageAttributeName];
         if (TLLabelIsNull(imgInfoDic)) {
@@ -278,6 +317,15 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     lineVerticalLayout.maxImageAscent = maxImageAscent;
     
     return lineVerticalLayout;
+}
+
++ (NSArray*)getLines:(NSAttributedString*)attStr width:(CGFloat)width{
+    CTFramesetterRef frameSetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attStr);
+    CGMutablePathRef path = CGPathCreateMutable();
+    CGPathAddRect(path, NULL, CGRectMake(0,0,width,100000));
+    CTFrameRef frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, 0), path, NULL);
+    NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
+    return lines;
 }
 
 /**

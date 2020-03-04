@@ -46,8 +46,7 @@ typedef NS_ENUM(NSInteger, TLSelectViewAction) {
 typedef void(^TLSelectRangManagerBlock)(void);
 
 @interface TLSelectRangManager()
-/// 输入视图
-@property (nonatomic,weak) UITextView *view;
+
 /// 富文本
 @property (nonatomic,strong) NSAttributedString *attributedText;
 /// 字体
@@ -58,8 +57,8 @@ typedef void(^TLSelectRangManagerBlock)(void);
 @property (nonatomic,assign) TLSelectViewAction selectViewAction;
 /// 消失的block
 @property (nonatomic,copy) TLSelectRangManagerBlock hideBlock;
-/// 添加在window层的view，用来检测点击任意view时隐藏CJSelectBackView
-@property (nonatomic, strong) TLWindowView *backWindView;
+///// 添加在window层的view，用来检测点击任意view时隐藏CJSelectBackView
+//@property (nonatomic, strong) TLWindowView *backWindView;
 // 记录textview所属的superview数组
 @property (nonatomic, strong) NSMutableArray *scrlooViewArray;
 /// 长按手势
@@ -81,6 +80,16 @@ typedef void(^TLSelectRangManagerBlock)(void);
 }
 
 #pragma mark - Public Method
+
+//+ (UIWindow*)keyWindow {
+//    UIApplication *app = [UIApplication sharedApplication];
+//    if ([app.delegate respondsToSelector:@selector(window)]) {
+//        return [app.delegate window];
+//    } else {
+//        return [app keyWindow];
+//    }
+//}
+
 + (instancetype)instance {
     static TLSelectRangManager *manager = nil;
     static dispatch_once_t once;
@@ -88,13 +97,13 @@ typedef void(^TLSelectRangManagerBlock)(void);
         manager = [[TLSelectRangManager alloc] initWithFrame:CGRectZero];
         manager.backgroundColor = [UIColor clearColor];
 
-        manager.backWindView = [[TLWindowView alloc]initWithFrame:CGRectMake(0, 0, 1, 1)];
-        __weak typeof(manager)wManager = manager;
-        manager.backWindView.hitTestBlock = ^(BOOL hide) {
+//        manager.backWindView = [[TLWindowView alloc]initWithFrame:CGRectMake(0, 0, 1, 1)];
+//        __weak typeof(manager)wManager = manager;
+//        manager.backWindView.hitTestBlock = ^(BOOL hide) {
 //            [wManager hideSelectTextRangeView];
-        };        /*
-         *选择复制填充背景色视图
-         */
+//        };        /*
+//         *选择复制填充背景色视图
+//         */
         manager.textRangeView = [[TLSelectTextRangeView alloc]init];
         manager.textRangeView.hidden = YES;
         [manager addSubview:manager.textRangeView];
@@ -150,8 +159,8 @@ typedef void(^TLSelectRangManagerBlock)(void);
     _firstRunItem = [[allRunItemArray firstObject] copy];
     _lastRunItem = [[allRunItemArray lastObject] copy];
     
-    _startCopyRunItem = [item copy];
-    _endCopyRunItem = _startCopyRunItem;
+    _startCopyRunItem = [_firstRunItem copy];
+    _endCopyRunItem = [_lastRunItem copy];
     
     
     
@@ -161,10 +170,10 @@ typedef void(^TLSelectRangManagerBlock)(void);
     
 
 
-    CGRect windowFrame = [view.superview convertRect:view.frame toView:TLkeyWindow()];
-    self.backWindView.frame = windowFrame;
-    self.backWindView.hidden = NO;
-    [TLkeyWindow() addSubview:self.backWindView];
+//    CGRect windowFrame = [view.superview convertRect:view.frame toView:[TLSelectRangManager keyWindow]];
+//    self.backWindView.frame = windowFrame;
+//    self.backWindView.hidden = NO;
+//    [[TLSelectRangManager keyWindow] addSubview:self.backWindView];
 
     if (self.subviews.count == 0) {
         [self addSubview:self.textRangeView];
@@ -173,7 +182,7 @@ typedef void(^TLSelectRangManagerBlock)(void);
     [view bringSubviewToFront:self];
     
     // 不添加放大镜视图
-//    [TLkeyWindow() addSubview:self.magnifierView];
+//    [[TLSelectRangManager keyWindow] addSubview:self.magnifierView];
     
     [self scrollViewUnable:NO];
     
@@ -259,6 +268,18 @@ typedef void(^TLSelectRangManagerBlock)(void);
     self.hideBlock = nil;
 }
 
+/// 判断是否全选
+- (BOOL)isSelectAll {
+    if (_allRunItemArray.count <= 0) {
+        return false;
+    }
+    
+    NSRange selRange = [self selectRange];
+    NSRange range = NSMakeRange(0, self.attributedText.length);
+    
+    return NSEqualRanges(selRange, range);
+}
+
 /**
  隐藏所有与选择复制相关的视图
  */
@@ -266,8 +287,8 @@ typedef void(^TLSelectRangManagerBlock)(void);
     _startCopyRunItem = nil;
     _endCopyRunItem = nil;
     self.textRangeView.hidden = YES;
-    self.backWindView.hidden = YES;
-    [self.backWindView removeFromSuperview];
+//    self.backWindView.hidden = YES;
+//    [self.backWindView removeFromSuperview];
     [self removeFromSuperview];
 }
 
@@ -339,34 +360,49 @@ typedef void(^TLSelectRangManagerBlock)(void);
 #pragma mark - touches
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"xxxxx touchesBegan");
+//    NSLog(@"xxxxx touchesBegan");
     _haveMove = NO;
     CGPoint point = [[touches anyObject] locationInView:self];
     //复制选择正在移动的大头针
     self.selectViewAction = [self choseSelectView:point];
-    NSLog(@"selectViewAction %zd", self.selectViewAction);
+//    NSLog(@"selectViewAction %zd", self.selectViewAction);
+    
+    if (self.beginMoveBlock) {
+        self.beginMoveBlock();
+    }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"xxxxx touchesEnded");
+//    NSLog(@"xxxxx touchesEnded");
 //    self.magnifierView.hidden = YES;
     if (!self.textRangeView.hidden) {
 //        [self showMenuView];
     }
+    if (self.endMoveBlock) {
+        self.endMoveBlock();
+    }
+    
     _haveMove = NO;
 }
 
 - (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event {
-    NSLog(@"xxxxx touchesCancelled");
+//    NSLog(@"xxxxx touchesCancelled");
 //    self.magnifierView.hidden = YES;
     if (!self.textRangeView.hidden) {
 //        [self showMenuView];
+    }
+    if (self.endMoveBlock) {
+        self.endMoveBlock();
     }
     _haveMove = NO;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    NSLog(@"xxxxx touchesMoved");
+//    NSLog(@"xxxxx touchesMoved");
+    
+    if (self.movingBlock) {
+        self.movingBlock();
+    }
     _haveMove = YES;
     CGPoint point = [[touches anyObject] locationInView:self];
     
@@ -413,9 +449,7 @@ typedef void(^TLSelectRangManagerBlock)(void);
             }
         }
         else if (self.selectViewAction == MoveRightSelectView) {
-            
-            NSLog(@"xxxxx MoveRightSelectView currentItem %zd _startCopyRunItem %zd", currentItem.characterIndex,  _startCopyRunItem.characterIndex);
-            if (currentItem.characterIndex > _startCopyRunItem.characterIndex) {
+                if (currentItem.characterIndex > _startCopyRunItem.characterIndex) {
                 _endCopyRunItem = [currentItem copy];
                 [self showCJSelectViewWithPoint:selectPoint
                                      selectType:MoveRightSelectView
@@ -438,6 +472,8 @@ typedef void(^TLSelectRangManagerBlock)(void);
     } else {
         NSLog(@"xxxxx current %@ selectViewAction %zd", currentItem, self.selectViewAction);
     }
+    
+//    NSLog(@"是否全选 %d", [self isSelectAll]);
 }
 
 - (BOOL)touchesShouldCancelInContentView:(UIView *)view {
