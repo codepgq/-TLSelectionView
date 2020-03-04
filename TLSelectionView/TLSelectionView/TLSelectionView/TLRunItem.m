@@ -105,12 +105,27 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), origins);
    
     CGRect lineRects[lines.count];
+    CGRect lastLineRect = CGRectZero;
     for (int i = 0; i<lines.count; i++) {
         CTLineRef lineRef = (__bridge CTLineRef )lines[i];
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
         CGFloat lineWidth = CTLineGetTypographicBounds(lineRef, &lineAscent, &lineDescent, &lineLeading);
+        CFRange lineRange = CTLineGetStringRange(lineRef);
+        NSRange range = NSMakeRange(lineRange.location, lineRange.length);
+        NSString *lineString = [attributedM.string substringWithRange:range];
+        BOOL isHasEmoji = [self stringContainsEmoji:lineString];
+        CGFloat height = lineAscent + fabs(lineDescent);
+        CGFloat y = 100000 - origins[i].y - lineAscent + lineLeading;
+        if (!isHasEmoji) {
+            height = [self getString:lineString lineSpacing:3 font:[UIFont systemFontOfSize:15] width:lineWidth];
+        }
+        if (i == lines.count - 1) { // 最后一行
+            height = rect.size.height - lastLineRect.origin.y - lineAscent + fabs(lineDescent);
+        }
         
-        lineRects[i] = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent + lineLeading, lineWidth, lineAscent + fabs(lineDescent) + lineLeading);
+        y = CGRectGetMaxY(lastLineRect);
+        
+        lineRects[i] = CGRectMake(origins[i].x, y, lineWidth,  height);
         if (lineDescent < 0) {
             NSLog(@"dddddddddd");
         }
@@ -124,6 +139,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         }
         NSLog(@"%.2f %.2f %.2f", lineAscent, lineDescent, lineLeading);
         NSLog(@"lineRects %@ ", NSStringFromCGRect(lineRects[i]));
+        lastLineRect = lineRects[i];
     }
     
     
@@ -345,12 +361,42 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     return resultRect;
 }
 
-- (CGFloat)getString:(NSString *)string lineSpacing:(CGFloat)lineSpacing font:(UIFont*)font width:(CGFloat)width {
++ (CGFloat)getString:(NSString *)string lineSpacing:(CGFloat)lineSpacing font:(UIFont*)font width:(CGFloat)width {
     NSMutableParagraphStyle *paraStyle = [[NSMutableParagraphStyle alloc] init];
     paraStyle.lineSpacing = lineSpacing;
     NSDictionary *dic = @{ NSFontAttributeName:font, NSParagraphStyleAttributeName:paraStyle };
     CGSize size = [string boundingRectWithSize:CGSizeMake(width, MAXFLOAT) options: NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:dic context:nil].size;
     return  ceilf(size.height);
+}
+
+//判断是否有emoji
++ (BOOL)stringContainsEmoji:(NSString *)string
+{
+    __block BOOL returnValue = NO;
+    
+    [string enumerateSubstringsInRange:NSMakeRange(0, [string length])
+                               options:NSStringEnumerationByComposedCharacterSequences
+                            usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
+                                const unichar high = [substring characterAtIndex: 0];
+                                
+                                // Surrogate pair (U+1D000-1F9FF)
+                                if (0xD800 <= high && high <= 0xDBFF) {
+                                    const unichar low = [substring characterAtIndex: 1];
+                                    const int codepoint = ((high - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000;
+                                    
+                                    if (0x1D000 <= codepoint && codepoint <= 0x1F9FF){
+                                        returnValue = YES;
+                                    }
+                                    
+                                    // Not surrogate pair (U+2100-27BF)
+                                } else {
+                                    if (0x2100 <= high && high <= 0x27BF){
+                                        returnValue = YES;
+                                    }
+                                }
+                            }];
+    
+    return returnValue;
 }
 
 /*
