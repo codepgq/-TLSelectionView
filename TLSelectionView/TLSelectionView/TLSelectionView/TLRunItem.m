@@ -109,6 +109,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         CTLineRef lineRef = (__bridge CTLineRef )lines[i];
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
         CGFloat lineWidth = CTLineGetTypographicBounds(lineRef, &lineAscent, &lineDescent, &lineLeading);
+        
         lineRects[i] = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent + lineLeading, lineWidth, lineAscent + fabs(lineDescent) + lineLeading);
         if (lineDescent < 0) {
             NSLog(@"dddddddddd");
@@ -342,6 +343,14 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     
     resultRect = CGRectMake(rect.origin.x, y, rect.size.width, rect.size.height);
     return resultRect;
+}
+
+- (CGFloat)getString:(NSString *)string lineSpacing:(CGFloat)lineSpacing font:(UIFont*)font width:(CGFloat)width {
+    NSMutableParagraphStyle *paraStyle = [[NSMutableParagraphStyle alloc] init];
+    paraStyle.lineSpacing = lineSpacing;
+    NSDictionary *dic = @{ NSFontAttributeName:font, NSParagraphStyleAttributeName:paraStyle };
+    CGSize size = [string boundingRectWithSize:CGSizeMake(width, MAXFLOAT) options: NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:dic context:nil].size;
+    return  ceilf(size.height);
 }
 
 /*
