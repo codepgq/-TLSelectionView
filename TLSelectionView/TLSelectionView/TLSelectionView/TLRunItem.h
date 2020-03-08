@@ -44,7 +44,10 @@ struct TLCTLineVerticalLayout {
 };
 typedef struct TLCTLineVerticalLayout TLCTLineVerticalLayout;
 
-
+@interface TLTextTag: NSURL
+@property (nonatomic, assign) NSInteger index;
+@property (nonatomic, strong) NSValue *rangeValue;
+@end
 
 @interface TLRunItem : NSObject<NSCopying>
 /// 所在CTLine的行高信息结构体

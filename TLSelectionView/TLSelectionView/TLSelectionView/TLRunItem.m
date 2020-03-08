@@ -15,10 +15,7 @@ NSString * const kTLImageAttributeName = @"kCJImageAttributeName";
 NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment";
 
 #pragma mark - 用于标记的类
-@interface TLTextTag: NSURL
-@property (nonatomic, assign) NSInteger index;
-@property (nonatomic, strong) NSValue *rangeValue;
-@end
+
 
 @implementation TLTextTag
 
@@ -33,9 +30,9 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     TLRunItem *item = [[[self class] allocWithZone:zone] init];
     
     item.withOutMergeBounds = self.withOutMergeBounds;
-
+    
     item.lineVerticalLayout = self.lineVerticalLayout;
-   
+    
     item.selectCopyBackHeight = self.selectCopyBackHeight;
     
     item.selectCopyBackY = self.selectCopyBackY;
@@ -53,225 +50,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
 /// @param rect rect
 /// @param view view
 + (NSMutableArray<TLRunItem*>*)getItemsWith:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UITextView *)view {
-    
-    // 保存item用的数组
-    __block NSMutableArray *items = [NSMutableArray array];
-    
-    
-    NSMutableAttributedString *matt = attributedString.mutableCopy;
-    
-    __block int index = 0;
-    [matt.string enumerateSubstringsInRange:NSMakeRange(0, [matt length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
-     ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
-//        NSLog(@"substring is %@", substring);
-        TLTextTag *runUrl = nil;
-        if (!runUrl) {
-            NSString *urlStr = [NSString stringWithFormat:@"https://www.CJLabel%@",@(index)];
-            runUrl = [TLTextTag URLWithString:urlStr];
-        }
-        runUrl.index = index;
-        runUrl.rangeValue = [NSValue valueWithRange:substringRange];
-        [matt addAttribute:NSLinkAttributeName
-                     value:runUrl
-                     range:substringRange];
-        index++;
-    }];
-    
-    NSAttributedString *attributedM = matt;
-//    view.attributedText = matt;
-    // 1、根据attstring 得到工厂类
-    // 生成工厂类
-//    CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
-//
-//    // 2、得到ctframe
-    static CGRect _pathRect;
-    _pathRect = rect;
-////    rect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1, -1));
-//    CGPathRef path = CGPathCreateWithRect(rect, NULL);
-//
-//    CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedString));
-//    CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
-
-    // 3、得到lines
-    
-    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, CGRectMake(0,0,rect.size.width,100000));
-    CTFrameRef frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), path, NULL);
-    NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
-    
-    // 根据lines获取每一行的原点信息
-    CGPoint origins[lines.count];//the origins of each line at the baseline
-    CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), origins);
-   
-    CGRect lineRects[lines.count];
-    CGRect lastLineRect = CGRectZero;
-    for (int i = 0; i<lines.count; i++) {
-        CTLineRef lineRef = (__bridge CTLineRef )lines[i];
-        CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
-        CGFloat lineWidth = CTLineGetTypographicBounds(lineRef, &lineAscent, &lineDescent, &lineLeading);
-        CFRange lineRange = CTLineGetStringRange(lineRef);
-        NSRange range = NSMakeRange(lineRange.location, lineRange.length);
-        NSString *lineString = [attributedM.string substringWithRange:range];
-        BOOL isHasEmoji = [self stringContainsEmoji:lineString];
-        CGFloat height = lineAscent + fabs(lineDescent);
-        CGFloat y = 100000 - origins[i].y - lineAscent + lineLeading;
-        if (!isHasEmoji) {
-            height = [self getString:lineString lineSpacing:3 font:[UIFont systemFontOfSize:15] width:lineWidth];
-        }
-        if (i == lines.count - 1) { // 最后一行
-            height = rect.size.height - lastLineRect.origin.y - lineAscent + fabs(lineDescent);
-        }
-        
-        y = CGRectGetMaxY(lastLineRect);
-        
-        lineRects[i] = CGRectMake(origins[i].x, y, lineWidth,  height);
-        if (lineDescent < 0) {
-            NSLog(@"dddddddddd");
-        }
-        
-        if (lineAscent < 0) {
-            NSLog(@"fffffffffffff");
-        }
-        
-        if (lineLeading < 0) {
-            NSLog(@"llllllllllllllll");
-        }
-        NSLog(@"%.2f %.2f %.2f", lineAscent, lineDescent, lineLeading);
-        NSLog(@"lineRects %@ ", NSStringFromCGRect(lineRects[i]));
-        lastLineRect = lineRects[i];
-    }
-    
-    
-    // 新建一个数组，保存每一行的一些基本信息
-    NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
-    
-    // 行下标
-    NSUInteger lineIndex = 0;
-    TLCTLineVerticalLayout layout;
-    CGFloat maxDescent = 0;
-    for (id lineObj in lines) {
-        // 获取行
-        CTLineRef line = (__bridge CTLineRef)lineObj;
-        // 计算每一行的 ascent descent leading
-        CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
-        CGRect AlineRect = CGRectZero;
-        
-        // 把上面的信息转化为model，记录起来
-        layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
-#if false // 之前的行高算法
-        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height;
-#else
-        CGFloat AlineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
-        maxDescent = MAX(maxDescent, lineDescent);
-        CGPoint AlineOrigin = origins[lineIndex];
-        CGPoint AlinePoint;
-        AlinePoint.y = _pathRect.size.height - AlineOrigin.y - lineAscent + lineDescent;
-        if (lineIndex > 0) {
-            AlinePoint.y += lineLeading + view.contentInset.top + view.textContainerInset.top;
-        }
-        if (lineIndex == 0) {
-            AlinePoint.y = 0 + view.contentInset.top + view.textContainerInset.top;
-        }
-        AlinePoint.x = _pathRect.origin.x + AlineOrigin.x;
-        AlineRect = CGRectMake(AlinePoint.x, AlinePoint.y, AlineWidth, CTLineGetBoundsWithOptions(line, 0).size.height);
-        NSLog(@"height: %.2f maxRunAscent %.2f maxRunHeight %.2f", AlineRect.size.height, layout.maxRunAscent, layout.maxRunHeight);
-        AlineRect.size.height = layout.maxRunHeight;
-        layout.lineRect = lineRects[lineIndex];
-#endif
-        TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
-        model.lineIndex = lineIndex;
-        model.lineVerticalLayout = layout;
-        model.selectCopyBackY = layout.lineRect.origin.y;
-        model.selectCopyBackHeight = layout.lineRect.size.height;
-        
-        // 保存line信息
-        [verticalLayoutArray addObject:model];
-        
-        NSLog(@"xxxxxx \n%@\n%@", NSStringFromCGRect(layout.lineRect),NSStringFromCGRect(AlineRect));
-        
-        // 得到每一行中的所有的CTRunRef对象，从而计算得到每个字符的位置大小
-        NSArray *runs = ((NSArray *)CTLineGetGlyphRuns(line));
-        for (int idx = 0; idx < runs.count; idx++) {
-            // 得到run
-            CTRunRef run = (__bridge CTRunRef)(runs[idx]);
-            // 获取字符的range
-//            CFRange runRange = CTRunGetStringRange(run);
-
-            // 用来保存run的大小位置
-            CGRect runBounds;
-
-            // 每个字符的ascent desecnt leading
-            CGFloat ascent;// height above the baseline
-            CGFloat descent;// height below the baseline
-            CGFloat leading;
-            runBounds.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, &leading);
-            runBounds.size.height = ascent + descent;
-
-            // 计算x的偏移量
-            CGFloat xOffset = 0;
-            CFRange glyphRange = CTRunGetStringRange(run);
-            switch (CTRunGetStatus(run)) {
-                case kCTRunStatusRightToLeft:
-                    xOffset = CTLineGetOffsetForStringIndex(line, glyphRange.location + glyphRange.length, NULL);
-                    break;
-                default:
-                    xOffset = CTLineGetOffsetForStringIndex(line, glyphRange.location, NULL);
-                    break;
-            }
-            
-            // 计算y坐标
-            runBounds.origin.x = origins[lineIndex].x + rect.origin.x + xOffset;
-            runBounds.origin.y = origins[lineIndex].y + rect.origin.y;
-            runBounds.origin.y -= descent;
-            
-//            NSLog(@"每一个runitem的信息 %@", NSStringFromCGRect(runBounds));
-            
-            // 把CTRunRef转化为model保存起来
-            TLRunItem *item = [[TLRunItem alloc] init];
-            item.lineVerticalLayout = layout;
-            item.selectCopyBackY = item.lineVerticalLayout.lineRect.origin.y;
-            item.selectCopyBackHeight = item.lineVerticalLayout.lineRect.size.height;
-            
-            //转换为UIKit坐标系统
-            CGRect locBounds = [TLRunItem convertRectFromLoc:runBounds view:view];
-            
-            
-            CGFloat withOutMergeBoundsY = item.lineVerticalLayout.lineRect.origin.y - (MAX(item.lineVerticalLayout.maxRunAscent, item.lineVerticalLayout.maxImageAscent) - item.lineVerticalLayout.lineRect.size.height);
-            item.withOutMergeBounds =
-            CGRectMake(locBounds.origin.x,
-                       withOutMergeBoundsY,
-                       locBounds.size.width,
-                       MAX(item.lineVerticalLayout.maxRunHeight, item.lineVerticalLayout.maxImageHeight));
-            
-            // 计算字符位置和字符rang，复制/判断区域的时候使用
-            NSInteger characterIndex = 0;
-            NSRange substringRange = NSMakeRange(0, 0);
-            
-            NSDictionary *attributes = (__bridge NSDictionary *)CTRunGetAttributes(run);
-                TLTextTag *runUrl = attributes[NSLinkAttributeName];
-                if ([runUrl isKindOfClass:[TLTextTag class]]) {
-                    characterIndex = runUrl.index;
-                    substringRange = [runUrl.rangeValue rangeValue];
-                }
-            item.characterIndex = characterIndex;
-            item.characterRange = substringRange;
-            
-            // 保存模型
-            [items addObject:item];
-        };
-        lineIndex++;
-    }
-    
-    // 释放资源
-    CGPathRelease(path);
-    CFRelease(framesetter);
-    
-    // 存储到单例中
-    [TLSelectRangManager instance].verticalLayoutArray = verticalLayoutArray.mutableCopy;
-    
-    // 返回已经计算完的模型数组
-    return items;
+    return [self newGetItems:attributedString textRect:rect view:view];
 }
 
 #pragma mark - 私有方法
@@ -279,7 +58,7 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
 /// 生成每一行的必要参数保存
 + (TLCTLineVerticalLayout)CJCTLineVerticalLayoutFromLine:(CTLineRef)line
                                                lineIndex:(CFIndex)lineIndex
-                                                   origin:(CGPoint)origin
+                                                  origin:(CGPoint)origin
                                               lineAscent:(CGFloat)lineAscent
                                              lineDescent:(CGFloat)lineDescent
                                              lineLeading:(CGFloat)lineLeading
@@ -314,14 +93,14 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         }
     }
     
-//    CGRect lineBounds = CTLineGetBoundsWithOptions(line, 0);
+    //    CGRect lineBounds = CTLineGetBoundsWithOptions(line, 0);
     
-        CGRect lineBounds = CTLineGetImageBounds(line, NULL);
-        //每一行的起始点（相对于context）加上相对于本身基线原点的偏移量
-        lineBounds.origin.x += origin.x;
-        lineBounds.origin.y += origin.y;
+    CGRect lineBounds = CTLineGetImageBounds(line, NULL);
+    //每一行的起始点（相对于context）加上相对于本身基线原点的偏移量
+    lineBounds.origin.x += origin.x;
+    lineBounds.origin.y += origin.y;
     lineBounds.origin.y = lineBounds.origin.y - lineBounds.size.height;
-//        lineBounds.size.width = lineBounds.size.width + self.textInsets.left + self.textInsets.right;
+    //        lineBounds.size.width = lineBounds.size.width + self.textInsets.left + self.textInsets.right;
     
     TLCTLineVerticalLayout lineVerticalLayout;
     lineVerticalLayout.line = lineIndex;
@@ -336,86 +115,22 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     return lineVerticalLayout;
 }
 
-+ (NSArray*)getLines:(NSAttributedString*)attStr width:(CGFloat)width{
-    CTFramesetterRef frameSetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attStr);
-    CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, CGRectMake(0,0,width,100000));
-    CTFrameRef frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, 0), path, NULL);
-    NSArray *lines = (__bridge NSArray *)CTFrameGetLines(frame);
-    return lines;
-}
 
-/**
- 将系统坐标转换为屏幕坐标
- 
- @param rect 坐标原点在左下角的 rect
- @return 坐标原点在左上角的 rect
- */
-+ (CGRect)convertRectFromLoc:(CGRect)rect view:(UIView *)view {
++ (NSMutableArray<TLRunItem*>*)newGetItems:(NSAttributedString *)attributedString textRect:(CGRect)rect view:(UITextView *)view {
     
-    CGRect resultRect = CGRectZero;
-    CGFloat labelRectHeight = view.bounds.size.height; //- view.textInsets.top - self.textInsets.bottom - _translateCTMty;
-    CGFloat y = labelRectHeight - rect.origin.y - rect.size.height;
+    NSMutableArray *items = [NSMutableArray array];
     
-    resultRect = CGRectMake(rect.origin.x, y, rect.size.width, rect.size.height);
-    return resultRect;
-}
-
-+ (CGFloat)getString:(NSString *)string lineSpacing:(CGFloat)lineSpacing font:(UIFont*)font width:(CGFloat)width {
-    NSMutableParagraphStyle *paraStyle = [[NSMutableParagraphStyle alloc] init];
-    paraStyle.lineSpacing = lineSpacing;
-    NSDictionary *dic = @{ NSFontAttributeName:font, NSParagraphStyleAttributeName:paraStyle };
-    CGSize size = [string boundingRectWithSize:CGSizeMake(width, MAXFLOAT) options: NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingUsesFontLeading attributes:dic context:nil].size;
-    return  ceilf(size.height);
-}
-
-//判断是否有emoji
-+ (BOOL)stringContainsEmoji:(NSString *)string
-{
-    __block BOOL returnValue = NO;
-    
-    [string enumerateSubstringsInRange:NSMakeRange(0, [string length])
-                               options:NSStringEnumerationByComposedCharacterSequences
-                            usingBlock:^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
-                                const unichar high = [substring characterAtIndex: 0];
-                                
-                                // Surrogate pair (U+1D000-1F9FF)
-                                if (0xD800 <= high && high <= 0xDBFF) {
-                                    const unichar low = [substring characterAtIndex: 1];
-                                    const int codepoint = ((high - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000;
-                                    
-                                    if (0x1D000 <= codepoint && codepoint <= 0x1F9FF){
-                                        returnValue = YES;
-                                    }
-                                    
-                                    // Not surrogate pair (U+2100-27BF)
-                                } else {
-                                    if (0x2100 <= high && high <= 0x27BF){
-                                        returnValue = YES;
-                                    }
-                                }
-                            }];
-    
-    return returnValue;
-}
-
-/*
-+ (NSMutableArray<TLRunItem*>*)ItemsWith:(NSAttributedString *)attributedString size:(CGSize)size view:(UIView *)view  {
-    
-    // 保存item用的数组
-    __block NSMutableArray *items = [NSMutableArray array];
-    
-    
-    NSMutableAttributedString *matt = attributedString.mutableCopy;
+    // 对attributedString进行设置
+    NSMutableAttributedString *matt = [attributedString mutableCopy];
     
     __block int index = 0;
     [matt.string enumerateSubstringsInRange:NSMakeRange(0, [matt length]) options:NSStringEnumerationByComposedCharacterSequences usingBlock:
      ^(NSString *substring, NSRange substringRange, NSRange enclosingRange, BOOL *stop) {
-        
-        TextTag *runUrl = nil;
+                NSLog(@"substring is %@", substring);
+        TLTextTag *runUrl = nil;
         if (!runUrl) {
             NSString *urlStr = [NSString stringWithFormat:@"https://www.CJLabel%@",@(index)];
-            runUrl = [TextTag URLWithString:urlStr];
+            runUrl = [TLTextTag URLWithString:urlStr];
         }
         runUrl.index = index;
         runUrl.rangeValue = [NSValue valueWithRange:substringRange];
@@ -425,87 +140,130 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
         index++;
     }];
     
-    NSAttributedString *attributedM = matt;
-    // 1、根据attstring 得到工厂类
-    // 生成工厂类
-    CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
     
-    // 2、得到ctframe
-    CGRect rect = (CGRect){CGPointZero, size};
+    // 1 拿到富文本
+    NSAttributedString *attr = matt;
+    
+    // 2 得到ctframe
+    
+    // 2.1 通过NSAttributedString得到CTFramesetter
+    CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attr);
+    // 2.2 设置大小（如果这里填写的是实际大小，那么一定要足够是行数的高度的两倍，否则可能会导致获取行数的时候少一行）
+    CGSize size = CGSizeMake(rect.size.width, 100000);
+    // 2.3 创建一个path，相当于给他的绘制区域
     CGMutablePathRef path = CGPathCreateMutable();
-    CGPathAddRect(path, NULL, rect);
+    // 2.4 把size添加到path中
+    CGPathAddRect(path, NULL, CGRectMake(0, 0, size.width, size.height));
+    // 2.5 得到ctFrame
+    CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter,CFRangeMake(0, attr.length), path, NULL);
     
-    CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedM));
-    CTFrameRef ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
-
+    // 3 获取行
     NSArray *lines = (NSArray *)CTFrameGetLines(ctFrame);
-
-    __block CGPoint *origins;//the origins of each line at the baseline
+    
+    // 4 获取每一行的起点（原点）坐标
+    CGPoint origins[lines.count];
     CTFrameGetLineOrigins(ctFrame, CFRangeMake(0, 0), origins);
-
-    NSMutableArray <TLCTLineLayoutModel*>*verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
-    NSUInteger lineIndex = 0;
-    TLCTLineVerticalLayout layout;
-    for (id lineObj in lines) {
-        CTLineRef line = (__bridge CTLineRef)lineObj;
-        
-        CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
-        CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
-        layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:lineIndex origin:origins[lineIndex] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
-        layout.lineRect.origin.y = origins[0].y - layout.lineRect.origin.y - layout.lineRect.size.height;
-        TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
-        model.lineIndex = lineIndex;
-        model.lineVerticalLayout = layout;
-        model.selectCopyBackY = layout.lineRect.origin.y;
-        model.selectCopyBackHeight = layout.lineRect.size.height;
-        [verticalLayoutArray addObject:model];
-        NSLog(@"xxxxxx %@", NSStringFromCGRect(layout.lineRect));
-        
-        NSArray *runs = ((NSArray *)CTLineGetGlyphRuns(line));
-        for (int idx = 0; runs.count; idx++) {
-            CTRunRef run = (__bridge CTRunRef)(runs[idx]);
-            CFRange runRange = CTRunGetStringRange(run);
-
-            CGRect runBounds;
-
-            CGFloat ascent;//height above the baseline
-            CGFloat descent;//height below the baseline
-            CGFloat leading;
-            runBounds.size.width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, &leading);
-            runBounds.size.height = ascent + descent;
-
-            CGFloat xOffset = CTLineGetOffsetForStringIndex(line, CTRunGetStringRange(run).location, NULL);
-            runBounds.origin.x = origins[lineIndex].x + rect.origin.x + xOffset;
-            runBounds.origin.y = origins[lineIndex].y + rect.origin.y;
-            runBounds.origin.y -= descent;
-
-            //do something with runBounds
+    
+    
+    // 5 遍历每一行，得到每一行的数据信息
+    // 5.1 新建一个数组，保存每一行的一些基本信息
+    NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
+    
+    for (int i = 0; i < lines.count; i++) {
+        @autoreleasepool {
+            // 得到line
+            CTLineRef line = (__bridge CTLineRef)lines[i];
             
-            NSLog(@"每一个runitem的信息 %@", NSStringFromCGRect(runBounds));
+            // 得到行的bounds
+            CGRect lineBounds = CTLineGetBoundsWithOptions(line, 0);
+            // 新建 ascent descent leading
+            CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
+            // 得到行款和上面的三个属性
+            CGFloat lineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
             
+            // 计算每一行的rect
+            CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
             
-            TLRunItem *item = [[TLRunItem alloc] init];
-            [item setLineVerticalLayout:[verticalLayoutArray[lineIndex] lineVerticalLayout]];
-            item.selectCopyBackY = item.lineVerticalLayout.lineRect.origin.y;
-            item.selectCopyBackHeight = item.lineVerticalLayout.lineRect.size.height;
+            // 把行的信息结构器化
+            TLCTLineVerticalLayout layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:i origin:origins[i] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
+            layout.lineRect = lineFrame;
             
-            //转换为UIKit坐标系统
-            CGRect locBounds = [TLRunItem convertRectFromLoc:runBounds view:view];
+            // 把行的信息模型化
+            TLCTLineLayoutModel *model = [[TLCTLineLayoutModel alloc] init];
+            model.lineIndex = i;
+            model.lineVerticalLayout = layout;
+            model.selectCopyBackY = layout.lineRect.origin.y;
+            model.selectCopyBackHeight = layout.lineRect.size.height;
             
+            // 保存line信息
+            [verticalLayoutArray addObject:model];
             
-            CGFloat withOutMergeBoundsY = item.lineVerticalLayout.lineRect.origin.y - (MAX(item.lineVerticalLayout.maxRunAscent, item.lineVerticalLayout.maxImageAscent) - item.lineVerticalLayout.lineRect.size.height);
-            item.withOutMergeBounds =
-            CGRectMake(locBounds.origin.x,
-                       withOutMergeBoundsY,
-                       locBounds.size.width,
-                       MAX(item.lineVerticalLayout.maxRunHeight, item.lineVerticalLayout.maxImageHeight));
-            [items addObject:item];
-        };
-        lineIndex++;
+            // 得到每一行中的所有字符
+            NSArray *runItems = [self getRuns:line lineFrame:lineFrame layout:layout];
+            // 保存得到的字符信息
+            [items addObjectsFromArray:runItems];
+        }
     }
     
+    // 释放资源
+    CGPathRelease(path);
+    CFRelease(framesetter);
+    
+    // 存储到单例中
     [TLSelectRangManager instance].verticalLayoutArray = verticalLayoutArray.mutableCopy;
+    
     return items;
 }
-*/
+
++ (NSMutableArray<TLRunItem*>*)getRuns:(CTLineRef)line lineFrame:(CGRect)lineFrame layout:(TLCTLineVerticalLayout)layout {
+    // 新建数组保存每个字符的一些信息
+    NSMutableArray *runItems = [NSMutableArray array];
+    // 通过行得到每一行的字符数组
+    NSArray *runs = (NSArray*)CTLineGetGlyphRuns(line);
+    
+    // 遍历数组，并且把得到的数据模型化
+    for (int i = 0; i < runs.count; i++) {
+        @autoreleasepool {
+            // 得到每一个run
+            CTRunRef run = (__bridge CTRunRef)runs[i];
+            // 新建每个run的 ascent descent leading
+            CGFloat runAscent = 0.0f, runDescent = 0.0f, runLeading = 0.0f;
+            // 计算run的一些信息 宽度和上面的三个属性
+            CGFloat runWidth = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &runAscent, &runDescent, &runLeading);
+            // 得到run的bounds
+            CGRect runBounds = CTRunGetImageBounds(run, NULL, CFRangeMake(0, 0));
+            
+            // 计算得出run的rect
+            CGRect runFrame = CGRectMake(runBounds.origin.x + lineFrame.origin.x, lineFrame.origin.y, runWidth, lineFrame.size.height);
+            
+            // 把信息模型化
+            TLRunItem *item = [[TLRunItem alloc] init];
+            item.lineVerticalLayout = layout;
+            item.selectCopyBackY = item.lineVerticalLayout.lineRect.origin.y;
+            item.selectCopyBackHeight = item.lineVerticalLayout.lineRect.size.height;
+            item.withOutMergeBounds = runFrame;
+            
+            // 计算字符位置和字符rang，复制/判断区域的时候使用
+            NSInteger characterIndex = 0;
+            NSRange substringRange = NSMakeRange(0, 0);
+            
+            NSDictionary *attributes = (__bridge NSDictionary *)CTRunGetAttributes(run);
+            TLTextTag *runUrl = attributes[NSLinkAttributeName];
+            if ([runUrl isKindOfClass:[TLTextTag class]]) {
+                characterIndex = runUrl.index;
+                substringRange = [runUrl.rangeValue rangeValue];
+            }
+            item.characterIndex = characterIndex;
+            item.characterRange = substringRange;
+            
+            // 保存模型
+            [runItems addObject:item];
+        }
+        
+    }
+    
+    return  runItems;
+}
+
+
 @end
