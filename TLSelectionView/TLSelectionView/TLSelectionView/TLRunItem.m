@@ -166,6 +166,8 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
     
     
     // 5 遍历每一行，得到每一行的数据信息
+    CGFloat lastLineHeight = 0;
+    CGFloat offsetY = 0;
     // 5.1 新建一个数组，保存每一行的一些基本信息
     NSMutableArray<TLCTLineLayoutModel*> *verticalLayoutArray = [NSMutableArray arrayWithCapacity:3];
     
@@ -182,7 +184,12 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
             CGFloat lineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
             
             // 计算每一行的rect
-            CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
+            CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent + offsetY, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
+            
+            // 如果不一样，就要更新
+            if ((100000 - origins[i].y - lineAscent) != lineFrame.origin.y) {
+                origins[i].y = lineFrame.origin.y;
+            }
             
             // 把行的信息结构器化
             TLCTLineVerticalLayout layout = [self CJCTLineVerticalLayoutFromLine:line lineIndex:i origin:origins[i] lineAscent:lineAscent lineDescent:lineDescent lineLeading:lineLeading];
@@ -202,6 +209,11 @@ NSString * const kTLImageLineVerticalAlignment = @"kCJImageLineVerticalAlignment
             NSArray *runItems = [self getRuns:line lineFrame:lineFrame layout:layout];
             // 保存得到的字符信息
             [items addObjectsFromArray:runItems];
+            
+            if (lineFrame.size.height < lastLineHeight) {
+                offsetY += (lastLineHeight - lineFrame.size.height);
+            }
+            lastLineHeight = lineFrame.size.height;
         }
     }
     

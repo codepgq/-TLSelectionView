@@ -40,8 +40,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    
-    tView = [[MTTextView alloc] initWithFrame:CGRectMake(0, 88, 414, 200)];
+    CGFloat width = [UIScreen mainScreen].bounds.size.width;
+    tView = [[MTTextView alloc] initWithFrame:CGRectMake(0, 88, 300, 200)];
 //    tView.backgroundColor = [UIColor redColor];
     [self.view addSubview:tView];
     
@@ -58,11 +58,11 @@
 //    paragraphStyle.paragraphSpacingBefore = 22.0f;//段首行空白空间/* Distance between the bottom of the previous paragraph (or the end of its paragraphSpacing, if any) and the top of this paragraph. */
 //    paragraphStyle.baseWritingDirection = NSWritingDirectionLeftToRight;//从左到右的书写方向（一共➡️三种）
 //    paragraphStyle.lineHeightMultiple = 15;/* Natural line height is multiplied by this factor (if positive) before being constrained by minimum and maximum line height. */
-//    paragraphStyle.hyphenationFactor = 0;//连字属性 在iOS，唯一支持的值分别为0和1
+//    paragraphStyle.hyphenationFactor = 1;//连字属性 在iOS，唯一支持的值分别为0和1
 
     
     
-    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:20]), NSParagraphStyleAttributeName: paragraphStyle}];
+    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:15]), NSParagraphStyleAttributeName: paragraphStyle}];
     
 //    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:nil];
 //
@@ -73,20 +73,22 @@
 //    ttView.backgroundColor = [UIColor redColor];
 //    [self.view addSubview:ttView];
 //
-//    tView.contentInset = UIEdgeInsetsZero;
-//    tView.backgroundColor = [UIColor greenColor];
+    tView.contentInset = UIEdgeInsetsZero;
     tView.attributedText = attString;
+
     tView.font = [UIFont systemFontOfSize:18];
     tView.textContainerInset = UIEdgeInsetsZero;
     tView.textContainer.lineFragmentPadding = 0;
     tView.textContainer.lineBreakMode = NSLineBreakByClipping;
     tView.textContainer.widthTracksTextView = true;
     tView.layoutManager.usesFontLeading = true;
+
     tView.contentOffset = CGPointZero;
     tView.userInteractionEnabled = true;
     tView.editable = false;
     tView.selectable = false;
     tView.scrollEnabled = false;
+    tView.clipsToBounds  =false;
     
     [tView addLongPressEvent];
 }
@@ -113,14 +115,17 @@
 //    NSLog(@"att %@  \nstr %@", attStr, str);
 
     
-    [self getInfo];
+//    [self getInfo];
+    [self processFixedLineHeight];
     
     
 }
 
 
 - (NSString  *)content1 {
-    return @"@李四客减少一个月的量，难以倍🏀❤️[哭笑不得]🐶也比不上🏀[呕吐]👻👑@李四客减少一个月的量，难以倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕吐]👻👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶也比不上🏀也比不上❤️也比不上[哭笑不得]🐶🏀也比不上[呕吐]👻也比不上👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀也比不上[吓]🐶也比不上🏀倍，也比不上陆@张三 @王金11🐶[干杯]🐶春天在哪里，🐶[哭笑不得]🐶春/n天@在你的眼睛里，oh, myaa god, @张三:18\n900126257 @李四 @巩柯 #王五# 春天在他的眼 [干杯]aa 睛里，春天在你aa我的眼睛里你的两岸观光进入寒冬，陆客赴bb台人数持续缩减。据台湾《经济日报》23日报道，民\n党当局转向冲刺“新南向”的bb客源，[哭笑不得]锁定菲律宾、越南、文莱、泰国、印度尼西亚和印度等，积极宣传及放宽来台“签证”措施。统计显示，蔡英文上任前一年de我，这些地区来台旅客数为65.我9万人次放宽后这一年增加到9";
+    return @"🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大";
+    return @"Conclusion: in today\'s rapid development of society, the network is not difficult, want to go to query history rewriting history doesn\'t have any meaning, the Japanese government not only is there no silver three hundred and twenty, for our own, we can do is to remember at the beginning that history, if not the dark ages, courage to stand up and patriotic hero, there would be no we now peaceful s happy life. What do you have to say to the Japanese who would rather be tricked into pretending to sleep? Welcome to share the discussion in the comment area, the progress of The Times and the changes of history, I will be with you! Conclusion: in today\'s rapid development of society, the network is not difficult, want to go to query history rewriting history doesn\'t have any meaning, the Japanese government not only is there no silver three hundred and twenty, for our own, we can do is to remember at the beginning that history, if not the dark ages, courage to stand up and patriotic hero, there would be no we now peaceful s happy life. What do you have to say to the Japanese who would rather be tricked into pretending to sleep? Welcome to share the discussion in the comment area, the progress of The Times and the changes of history, I will be with you!";
+//    return @"@李四客减少一个月的量，难以倍🏀❤️[哭笑不得]🐶也比不上🏀[呕吐]👻👑@李四客减少一个月的量，难以倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕吐]👻👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶也比不上🏀也比不上❤️也比不上[哭笑不得]🐶🏀也比不上[呕吐]👻也比不上👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀也比不上[吓]🐶也比不上🏀倍，也比不上陆@张三 @王金11🐶[干杯]🐶春天在哪里，🐶[哭笑不得]🐶春/n天@在你的眼睛里，oh, myaa god, @张三:18\n900126257 @李四 @巩柯 #王五# 春天在他的眼 [干杯]aa 睛里，春天在你aa我的眼睛里你的两岸观光进入寒冬，陆客赴bb台人数持续缩减。据台湾《经济日报》23日报道，民\n党当局转向冲刺“新南向”的bb客源，[哭笑不得]锁定菲律宾、越南、文莱、泰国、印度尼西亚和印度等，积极宣传及放宽来台“签证”措施。统计显示，蔡英文上任前一年de我，这些地区来台旅客数为65.我9万人次放宽后这一年增加到9";
 //    return @"也比不也比不也比不也比不也比不也比不也比不spancer 🏀👨‍👩‍👧‍👦👨‍👩‍👧‍👦@张三";
     return @"示例三：选择复制支持复制，双击或者长按可唤起UIMenuController进行选择复制文本操作。设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
     return @"示例三：选择复制\n\n支持复制，😆双击或者长按可唤起😁UIMenuController进行选择复制文本操作。\n设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
@@ -157,7 +162,7 @@
     // 2.1 通过NSAttributedString得到CTFramesetter
     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attr);
     // 2.2 设置大小（如果这里填写的是实际大小，那么一定要足够是行数的高度的两倍，否则可能会导致获取行数的时候少一行）
-    CGSize size = CGSizeMake(tView.frame.size.width, 100000);
+    CGSize size = CGSizeMake(tView.frame.size.width, 732);
     // 2.3 创建一个path，相当于给他的绘制区域
     CGMutablePathRef path = CGPathCreateMutable();
     // 2.4 把size添加到path中
@@ -179,6 +184,8 @@
     }];
     
     // 5 遍历每一行，得到每一行的数据信息
+    CGFloat lastLineHeight = 0;
+    CGFloat offsetY = 0;
     for (int i = 0; i < lines.count; i++) {
         CTLineRef line = (__bridge CTLineRef)lines[i];
         
@@ -186,24 +193,38 @@
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
         CGFloat lineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
         
-//        NSLog(@"%@", NSStringFromCGRect(lineBounds));
-//        NSLog(@"%@", NSStringFromCGRect(CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, lineAscent + lineDescent)));
-        
         // 计算每一行的rect，测试ok
-        CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
-//        UIView *lineView = [[UIView alloc] initWithFrame:lineFrame];
-//        lineView.tag = 1001;
-//        lineView.backgroundColor = (i % 2 == 0)
-//            ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
-//            : [[UIColor redColor] colorWithAlphaComponent:0.5];
-//        [tView addSubview:lineView];
+        CGRect lineFrame = CGRectMake(origins[i].x, 732 - origins[i].y - lineAscent + offsetY, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
         
+//        if ((732 - origins[i].y - lineAscent) != lineFrame.origin.y) {
+//            origins[i].y = lineFrame.origin.y;
+//        }
         
+//        lineFrame.origin.y += offsetY;
+//        lastLineHeight = MAX(lineFrame.size.height, lastLineHeight);
+        UIView *lineView = [[UIView alloc] initWithFrame:lineFrame];
+        lineView.tag = 1001;
+        lineView.backgroundColor = (i % 2 == 0)
+            ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
+            : [[UIColor redColor] colorWithAlphaComponent:0.5];
+        [tView addSubview:lineView];
+//
+//        if (i == 5) {
+//            NSLog(@"出问题了");
+//        }
+        NSLog(@"aaa %@", NSStringFromCGRect(lineBounds));
+        NSLog(@"bbb %@", NSStringFromCGRect(CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, lineAscent + lineDescent)));
+        NSLog(@"ccc %@", NSStringFromCGRect(lineFrame));
         // 测试每一个字的rect
         
         
-        
         [self getRuns:line lineFrame:lineFrame origins:origins lineIndex:i];
+        
+
+        if (lineFrame.size.height < lastLineHeight) {
+            offsetY += (lastLineHeight - lineFrame.size.height);
+        }
+        lastLineHeight = lineFrame.size.height;
     }
     
     
@@ -222,16 +243,128 @@
         NSLog(@"%@", NSStringFromCGRect(CGRectMake(origins[lineIndex].x, 100000 - origins[lineIndex].y - runAscent, runWidth, runAscent + runDescent)));
         
         CGRect runFrame = CGRectMake(runBounds.origin.x + lineFrame.origin.x, lineFrame.origin.y, runWidth, lineFrame.size.height);
+//
+//        UIView *runView = [[UIView alloc] initWithFrame:runFrame];
+//        runView.tag = 1001;
+//        runView.backgroundColor = (i % 2 == 0)
+//        ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
+//        : [[UIColor redColor] colorWithAlphaComponent:0.5];
+//        [tView addSubview:runView];
         
-        UIView *runView = [[UIView alloc] initWithFrame:runFrame];
-        runView.tag = 1001;
-        runView.backgroundColor = (i % 2 == 0)
-        ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
-        : [[UIColor redColor] colorWithAlphaComponent:0.5];
-        [tView addSubview:runView];
         
         
         
+    }
+}
+
+
+- (void)processFixedLineHeight
+{
+    [tView.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (obj.tag == 1001) {
+            [obj removeFromSuperview];
+        }
+    }];
+    @synchronized (tView.attributedText) {
+        // 生成富文本
+        NSMutableAttributedString * attributedM = [[NSMutableAttributedString alloc] initWithAttributedString:tView.attributedText];
+        
+        // 生成工厂类
+        CTFramesetterRef  framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)attributedM);
+        
+        
+        CGRect rect = (CGRect) {CGPointZero, tView.contentSize};
+        rect = UIEdgeInsetsInsetRect(rect, tView.contentInset);
+        rect = CGRectStandardize(rect);
+        CGRect _pathRect = rect;
+//        rect = CGRectApplyAffineTransform(rect, CGAffineTransformMakeScale(1, -1));
+        
+        CGPathRef path = CGPathCreateWithRect(rect, NULL);
+        
+        CFRange range = CFRangeMake(0, CFAttributedStringGetLength((__bridge CFAttributedStringRef)attributedM));
+        CTFrameRef _ctFrame = CTFramesetterCreateFrame(framesetter, range, path, NULL);
+        // 获取所有行
+        CFArrayRef lines = CTFrameGetLines(_ctFrame);
+        // 获取行数
+        CFIndex lineCount = CFArrayGetCount(lines);
+        // 新建一个数组，用来存储每一行的布局
+        NSMutableArray *lineLayouts = [NSMutableArray array];
+        
+        // 行的原点
+        CGPoint *lineOrigins = calloc(sizeof(CGPoint), lineCount);
+        // 行高
+        CGFloat *lineHeights = calloc(sizeof(CGFloat), lineCount);
+        // 得到每一行的原点和行高
+        CTFrameGetLineOrigins(_ctFrame, (CFRange) { 0, lineCount }, lineOrigins);
+        
+        // 计算全部的高度
+        __block CGFloat totalHeight = 0;
+        // 把cfarray 桥接到NSArray
+        NSArray *lineArray = (__bridge NSArray *)lines;
+        
+        // 遍历所有的行高，依次相加，得到整个的高度
+        [lineArray enumerateObjectsUsingBlock: ^ (id lineObj, NSUInteger idx, BOOL *stop) {
+            CTLineRef line = (__bridge CTLineRef)lineObj;
+            lineHeights[idx] = CTLineGetBoundsWithOptions(line, 0).size.height;
+            totalHeight+=lineHeights[idx];
+        }];
+        
+        // 行间距
+        CGFloat linespace = 0;
+        // 计算行间距
+        if (lineCount-1 > 0) {
+            linespace = (_pathRect.size.height - totalHeight - lineOrigins[lineCount-1].y)/(lineCount-1);
+        }
+        // 去除负数
+        if (linespace < 0) {
+            linespace = 0;
+        }
+        //         linespace = 0;
+        
+        // 行的y坐标
+        __block CGFloat linePointY = lineOrigins[0].y;
+        
+        //calculate line rect 计算每一行的大小
+        [lineArray enumerateObjectsUsingBlock: ^ (id lineObj, NSUInteger idx, BOOL *stop) {
+            // 拿到行
+            CTLineRef line = (__bridge CTLineRef)lineObj;
+            // 拿到行的原点
+            CGPoint lineOrigin = lineOrigins[idx];
+          
+            
+            
+            /// store LineLayout 保存每一行的布局
+            CGFloat descent,ascent,leading;
+            // 行高
+            CGFloat lineWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
+            // 新建一个linePoint用于存储行的坐标
+            CGPoint linePoint = CGPointZero;
+            linePoint.x = lineOrigin.x + _pathRect.origin.x;
+            linePoint.y = _pathRect.size.height - lineOrigin.y - lineHeights[idx] + descent;
+            if (idx > 0) {
+                linePoint.y += linespace;
+            }
+            // 每行的大小
+            CGRect lineRect = CGRectMake(linePoint.x, linePoint.y, lineWidth, lineHeights[idx]);
+            NSLog(@"index %zd %@", idx, NSStringFromCGRect(lineRect));
+           UIView *lineView = [[UIView alloc] initWithFrame:lineRect];
+           lineView.tag = 1001;
+           lineView.backgroundColor = (idx % 2 == 0)
+               ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
+               : [[UIColor redColor] colorWithAlphaComponent:0.5];
+           [tView addSubview:lineView];
+            
+            /// linePointY -- 行高进行减操作
+            linePointY-=linespace;
+            
+        }];
+        
+        // 释放资源
+        free(lineHeights);
+        free(lineOrigins);
+        
+        CGPathRelease(path);
+        CFRelease(framesetter);
         
     }
 }
