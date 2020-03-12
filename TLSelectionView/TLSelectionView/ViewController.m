@@ -58,11 +58,11 @@
 //    paragraphStyle.paragraphSpacingBefore = 22.0f;//段首行空白空间/* Distance between the bottom of the previous paragraph (or the end of its paragraphSpacing, if any) and the top of this paragraph. */
 //    paragraphStyle.baseWritingDirection = NSWritingDirectionLeftToRight;//从左到右的书写方向（一共➡️三种）
 //    paragraphStyle.lineHeightMultiple = 15;/* Natural line height is multiplied by this factor (if positive) before being constrained by minimum and maximum line height. */
-//    paragraphStyle.hyphenationFactor = 0;//连字属性 在iOS，唯一支持的值分别为0和1
+//    paragraphStyle.hyphenationFactor = 1;//连字属性 在iOS，唯一支持的值分别为0和1
 
     
     
-    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:20]), NSParagraphStyleAttributeName: paragraphStyle}];
+    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:@{NSFontAttributeName: ([UIFont systemFontOfSize:15]), NSParagraphStyleAttributeName: paragraphStyle}];
     
 //    NSMutableAttributedString *attString = [[NSMutableAttributedString alloc] initWithString:[self content1] attributes:nil];
 //
@@ -76,9 +76,9 @@
 //    tView.contentInset = UIEdgeInsetsZero;
 //    tView.backgroundColor = [UIColor greenColor];
     tView.attributedText = attString;
-//    tView.font = [UIFont systemFontOfSize:18];
-//    tView.textContainerInset = UIEdgeInsetsZero;
-//    tView.textContainer.lineFragmentPadding = 0;
+    tView.font = [UIFont systemFontOfSize:18];
+    tView.textContainerInset = UIEdgeInsetsZero;
+    tView.textContainer.lineFragmentPadding = 0;
     tView.contentOffset = CGPointZero;
     tView.userInteractionEnabled = true;
     tView.editable = false;
