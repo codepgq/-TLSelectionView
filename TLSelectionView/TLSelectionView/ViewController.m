@@ -40,8 +40,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    
-    tView = [[MTTextView alloc] initWithFrame:CGRectMake(0, 88, 414, 200)];
+    CGFloat width = [UIScreen mainScreen].bounds.size.width;
+    tView = [[MTTextView alloc] initWithFrame:CGRectMake(0, 88, 300, 200)];
 //    tView.backgroundColor = [UIColor redColor];
     [self.view addSubview:tView];
     
@@ -73,10 +73,9 @@
 //    ttView.backgroundColor = [UIColor redColor];
 //    [self.view addSubview:ttView];
 //
-//    tView.contentInset = UIEdgeInsetsZero;
-//    tView.backgroundColor = [UIColor greenColor];
+    tView.contentInset = UIEdgeInsetsZero;
     tView.attributedText = attString;
-    tView.font = [UIFont systemFontOfSize:18];
+    tView.font = [UIFont systemFontOfSize:15];
     tView.textContainerInset = UIEdgeInsetsZero;
     tView.textContainer.lineFragmentPadding = 0;
     tView.contentOffset = CGPointZero;
@@ -84,6 +83,7 @@
     tView.editable = false;
     tView.selectable = false;
     tView.scrollEnabled = false;
+    tView.clipsToBounds  =false;
     
     [tView addLongPressEvent];
 }
@@ -117,7 +117,9 @@
 
 
 - (NSString  *)content1 {
-    return @"@李四客减少一个月的量，难以倍🏀❤️[哭笑不得]🐶也比不上🏀[呕吐]👻👑@李四客减少一个月的量，难以倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕吐]👻👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶也比不上🏀也比不上❤️也比不上[哭笑不得]🐶🏀也比不上[呕吐]👻也比不上👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀也比不上[吓]🐶也比不上🏀倍，也比不上陆@张三 @王金11🐶[干杯]🐶春天在哪里，🐶[哭笑不得]🐶春/n天@在你的眼睛里，oh, myaa god, @张三:18\n900126257 @李四 @巩柯 #王五# 春天在他的眼 [干杯]aa 睛里，春天在你aa我的眼睛里你的两岸观光进入寒冬，陆客赴bb台人数持续缩减。据台湾《经济日报》23日报道，民\n党当局转向冲刺“新南向”的bb客源，[哭笑不得]锁定菲律宾、越南、文莱、泰国、印度尼西亚和印度等，积极宣传及放宽来台“签证”措施。统计显示，蔡英文上任前一年de我，这些地区来台旅客数为65.我9万人次放宽后这一年增加到9";
+    return @"🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大🚗大风大浪考试啊江东父老；阿三等奖大量的副科级拉萨地方拉上看到飞机撒短发🚕阿隆索飞机撒发达上的粉丝短发撒放撒短发撒短发师大撒放撒短发撒的撒短发撒短发师大";
+    return @"Conclusion: in today\'s rapid development of society, the network is not difficult, want to go to query history rewriting history doesn\'t have any meaning, the Japanese government not only is there no silver three hundred and twenty, for our own, we can do is to remember at the beginning that history, if not the dark ages, courage to stand up and patriotic hero, there would be no we now peaceful s happy life. What do you have to say to the Japanese who would rather be tricked into pretending to sleep? Welcome to share the discussion in the comment area, the progress of The Times and the changes of history, I will be with you! Conclusion: in today\'s rapid development of society, the network is not difficult, want to go to query history rewriting history doesn\'t have any meaning, the Japanese government not only is there no silver three hundred and twenty, for our own, we can do is to remember at the beginning that history, if not the dark ages, courage to stand up and patriotic hero, there would be no we now peaceful s happy life. What do you have to say to the Japanese who would rather be tricked into pretending to sleep? Welcome to share the discussion in the comment area, the progress of The Times and the changes of history, I will be with you!";
+//    return @"@李四客减少一个月的量，难以倍🏀❤️[哭笑不得]🐶也比不上🏀[呕吐]👻👑@李四客减少一个月的量，难以倍，也比不上陆@张三不上陆@张三 @李四客减少一个月的量，难以倍👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶🏀❤️[哭笑不得]🐶🏀[呕吐]👻👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀[吓]🐶也比不上🏀也比不上❤️也比不上[哭笑不得]🐶🏀也比不上[呕吐]👻也比不上👑👑[哭笑不得]🐶🏀[呕吐]🐶🏀也比不上[吓]🐶也比不上🏀倍，也比不上陆@张三 @王金11🐶[干杯]🐶春天在哪里，🐶[哭笑不得]🐶春/n天@在你的眼睛里，oh, myaa god, @张三:18\n900126257 @李四 @巩柯 #王五# 春天在他的眼 [干杯]aa 睛里，春天在你aa我的眼睛里你的两岸观光进入寒冬，陆客赴bb台人数持续缩减。据台湾《经济日报》23日报道，民\n党当局转向冲刺“新南向”的bb客源，[哭笑不得]锁定菲律宾、越南、文莱、泰国、印度尼西亚和印度等，积极宣传及放宽来台“签证”措施。统计显示，蔡英文上任前一年de我，这些地区来台旅客数为65.我9万人次放宽后这一年增加到9";
 //    return @"也比不也比不也比不也比不也比不也比不也比不spancer 🏀👨‍👩‍👧‍👦👨‍👩‍👧‍👦@张三";
     return @"示例三：选择复制支持复制，双击或者长按可唤起UIMenuController进行选择复制文本操作。设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
     return @"示例三：选择复制\n\n支持复制，😆双击或者长按可唤起😁UIMenuController进行选择复制文本操作。\n设置`CJLabel`为可点击链点，并指定其字体大小粗体15，字体颜色蓝色，边框线颜色为橙黄色，边框线粗细为1，边框线圆角取默认值5，背景填充颜色为浅灰色；👻点击高亮时字体颜色红色，边框线为红色，点击背景色橘黄色👏。";
@@ -176,6 +178,8 @@
     }];
     
     // 5 遍历每一行，得到每一行的数据信息
+    CGFloat lastLineHeight = 0;
+    CGFloat offsetY = 0;
     for (int i = 0; i < lines.count; i++) {
         CTLineRef line = (__bridge CTLineRef)lines[i];
         
@@ -183,24 +187,41 @@
         CGFloat lineAscent = 0.0f, lineDescent = 0.0f, lineLeading = 0.0f;
         CGFloat lineWidth = CTLineGetTypographicBounds(line, &lineAscent, &lineDescent, &lineLeading);
         
-//        NSLog(@"%@", NSStringFromCGRect(lineBounds));
-//        NSLog(@"%@", NSStringFromCGRect(CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, lineAscent + lineDescent)));
-        
         // 计算每一行的rect，测试ok
-        CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
-//        UIView *lineView = [[UIView alloc] initWithFrame:lineFrame];
-//        lineView.tag = 1001;
-//        lineView.backgroundColor = (i % 2 == 0)
-//            ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
-//            : [[UIColor redColor] colorWithAlphaComponent:0.5];
-//        [tView addSubview:lineView];
+        CGRect lineFrame = CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent + offsetY, lineWidth, MAX(lineBounds.size.height + lineLeading,(lineAscent + lineDescent + lineLeading)));
         
+        if ((100000 - origins[i].y - lineAscent) != lineFrame.origin.y) {
+            origins[i].y = lineFrame.origin.y;
+        }
         
-        // 测试每一个字的rect
-        
+//        lineFrame.origin.y += offsetY;
+//        lastLineHeight = MAX(lineFrame.size.height, lastLineHeight);
+        UIView *lineView = [[UIView alloc] initWithFrame:lineFrame];
+        lineView.tag = 1001;
+        lineView.backgroundColor = (i % 2 == 0)
+            ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
+            : [[UIColor redColor] colorWithAlphaComponent:0.5];
+        [tView addSubview:lineView];
+//
+//        if (i == 5) {
+//            NSLog(@"出问题了");
+//        }
+//        NSLog(@"aaa %@", NSStringFromCGRect(lineBounds));
+//        NSLog(@"bbb %@", NSStringFromCGRect(CGRectMake(origins[i].x, 100000 - origins[i].y - lineAscent, lineWidth, lineAscent + lineDescent)));
+//        NSLog(@"ccc %@", NSStringFromCGRect(lineFrame));
+//        // 测试每一个字的rect
         
         
         [self getRuns:line lineFrame:lineFrame origins:origins lineIndex:i];
+        
+//
+//        if (lineFrame.size.height < lastLineHeight) {
+//            offsetY += (lastLineHeight - lineFrame.size.height);
+//        }
+//        if (lineFrame.size.height > lastLineHeight) {
+//            offsetY += (lineFrame.size.height - lastLineHeight);
+//        }
+//        lastLineHeight = lineFrame.size.height;
     }
     
     
@@ -219,13 +240,13 @@
         NSLog(@"%@", NSStringFromCGRect(CGRectMake(origins[lineIndex].x, 100000 - origins[lineIndex].y - runAscent, runWidth, runAscent + runDescent)));
         
         CGRect runFrame = CGRectMake(runBounds.origin.x + lineFrame.origin.x, lineFrame.origin.y, runWidth, lineFrame.size.height);
-        
-        UIView *runView = [[UIView alloc] initWithFrame:runFrame];
-        runView.tag = 1001;
-        runView.backgroundColor = (i % 2 == 0)
-        ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
-        : [[UIColor redColor] colorWithAlphaComponent:0.5];
-        [tView addSubview:runView];
+//
+//        UIView *runView = [[UIView alloc] initWithFrame:runFrame];
+//        runView.tag = 1001;
+//        runView.backgroundColor = (i % 2 == 0)
+//        ? [[UIColor blueColor] colorWithAlphaComponent:0.5]
+//        : [[UIColor redColor] colorWithAlphaComponent:0.5];
+//        [tView addSubview:runView];
         
         
         
