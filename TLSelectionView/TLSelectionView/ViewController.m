@@ -76,9 +76,12 @@
 //    tView.contentInset = UIEdgeInsetsZero;
 //    tView.backgroundColor = [UIColor greenColor];
     tView.attributedText = attString;
-//    tView.font = [UIFont systemFontOfSize:18];
-//    tView.textContainerInset = UIEdgeInsetsZero;
-//    tView.textContainer.lineFragmentPadding = 0;
+    tView.font = [UIFont systemFontOfSize:18];
+    tView.textContainerInset = UIEdgeInsetsZero;
+    tView.textContainer.lineFragmentPadding = 0;
+    tView.textContainer.lineBreakMode = NSLineBreakByClipping;
+    tView.textContainer.widthTracksTextView = true;
+    tView.layoutManager.usesFontLeading = true;
     tView.contentOffset = CGPointZero;
     tView.userInteractionEnabled = true;
     tView.editable = false;
